@@ -14,11 +14,12 @@ app.post("/api/registrar", async ({ body }: { body: {nombre: string; correo: str
         correo,
         clave,
         descripcion,
+        fechaRegistro: new Date(),
       },
     });
     return {estado: 200, mensaje: "Se realizp la peticion correctamente"};
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return {estado: 500, mesnaje: "Hubo un error al realizar la petición"};
   }
 });
@@ -39,6 +40,7 @@ app.post("/api/bloquear", async ({ body }: { body: {correo:string; clave: string
           data: {
             usuarioId: usuario.id,
             usuarioBloqueadoId: usuarioBloquear.id,
+            fechaBloqueo: new Date(),
           },
         });
         return {estado:200, mensaje: "Usuario bloqueado exitosamente"};
@@ -49,7 +51,7 @@ app.post("/api/bloquear", async ({ body }: { body: {correo:string; clave: string
       return {estado: 400, mensaje: "Nombre de usuario o clave incorrecta"};
     }
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return {estado: 500, mensaje: "Hubo un error al realizar la petición"};
   }
 });
@@ -66,13 +68,76 @@ app.get("/api/informacion/:correo:", async ({ params }: { params: {correo: strin
       },
     });
     if (usuario) {
-      return {estado: 200, ...usuario};
+      return {...usuario};
     } else {
       return {estado: 400, mensaje: "Usuario no encontrado"};
     }
   } catch (error) {
     console.error(error);
     return {estado: 500, mensaje: "Hubo un error al realizar la petición"};
+  }
+});
+
+// Marcar como favorito
+app.post("/api/marcarcorreo", async ({ body }: { body: {correo: string; clave: string; id_correo_favorito: number} }) => {
+  const {correo, clave, id_correo_favorito} = body;
+  try {
+    const usuario = await prisma.user.findUnique({
+      where: {correo},
+    });
+    if (usuario && usuario.clave === clave) {
+      const usuarioFavorito = await prisma.user.findUnique({
+        where: {id: id_correo_favorito}
+      });
+      if (usuarioFavorito) {
+        await prisma.favoriteAddress.create({
+          data: {
+            usuarioId: usuario.id,
+            correoFavoritoId: usuarioFavorito.id,
+            fechaMarcado: new Date()
+          },
+        });
+        return {estado: 200, mensaje: "Usuario añadido a favoritos exitosamente"};
+      } else {
+        return {estado: 400, mensaje: "Usuario a añadir a favoritos no encontrado"};
+      }
+    } else {
+      return {estado: 400, mensaje: "Nombre de usuario o contraseña incorrecta"};
+    }
+  } catch (error) {
+    console.error(error);
+    return {estado: 400, mensaje: "Hubo un error al realizar la petición"};
+  }
+});
+
+// Desmarcar como favorito
+app.delete("/api/desmarcarcorreo", async ({ body }: { body: {correo: string; clave: string; id_correo_favorito: number} }) => {
+  const {correo, clave, id_correo_favorito} = body;
+  try {
+    const usuario = await prisma.user.findUnique({
+      where: {correo},
+    });
+    if (usuario && usuario.clave === clave) {
+      const usuarioFavorito = await prisma.user.findUnique({
+        where: {id: id_correo_favorito}
+      });
+      if (usuarioFavorito) {
+        await prisma.favoriteAddress.deleteMany({
+          where: {
+            usuarioId: usuario.id,
+            correoFavoritoId: usuarioFavorito.id,
+          },
+        });
+        return {estado: 200, mensaje: "Usuario eliminado de favoritos exitosamente"};
+      } else {
+        return {estado: 400, mensaje: "Usuario a eliminar no encontrado"};
+      }
+    } else {
+      return {estado: 400, mensaje: "Nombre de usuario o contraseña incorrecta"};
+    }
+  } catch (error) {
+    console.error(error);
+    return {estado: 400, mensaje: "Hubo un error al realizar la petición"};
   }
 });
 
