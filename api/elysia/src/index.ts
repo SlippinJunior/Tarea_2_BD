@@ -5,7 +5,7 @@ const app = new Elysia();
 const prisma = new PrismaClient();
 
 // Registrar usuario
-app.post("/api/registrar", async ({ body }: { body: any}) => {
+app.post("/api/registrar", async ({ body }: { body: {nombre: string; correo: string; clave: string; descripcion: string} }) => {
   const {nombre, correo, clave, descripcion} = body;
   try {
     const nuevoUsuario = await prisma.user.create({
@@ -24,7 +24,7 @@ app.post("/api/registrar", async ({ body }: { body: any}) => {
 });
 
 // Bloquear usuario
-app.post("/api/bloquear", async ({ body }: { body:any }) => {
+app.post("/api/bloquear", async ({ body }: { body: {correo:string; clave: string; correo_bloquear: string} }) => {
   const {correo, clave, correo_bloquear} = body;
   try {
     const usuario = await prisma.user.findUnique({
@@ -50,6 +50,28 @@ app.post("/api/bloquear", async ({ body }: { body:any }) => {
     }
   } catch (error) {
     console.error(error)
+    return {estado: 500, mensaje: "Hubo un error al realizar la petición"};
+  }
+});
+
+// Obtener información pública de cliente
+app.get("/api/informacion/:correo:", async ({ params }: { params: {correo: string} }) => {
+  try {
+    const usuario = await prisma.user.findUnique({
+      where: {correo: params.correo},
+      select: {
+        nombre: true,
+        correo: true,
+        descripcion: true,
+      },
+    });
+    if (usuario) {
+      return {estado: 200, ...usuario};
+    } else {
+      return {estado: 400, mensaje: "Usuario no encontrado"};
+    }
+  } catch (error) {
+    console.error(error);
     return {estado: 500, mensaje: "Hubo un error al realizar la petición"};
   }
 });
