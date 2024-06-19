@@ -3,6 +3,11 @@ import { PrismaClient } from "@prisma/client";
 
 const app = new Elysia();
 const prisma = new PrismaClient();
+const PORT = 3000;
+
+app.listen(PORT, () => {
+  console.log(`🦊 Elysia is running at http://localhost:${PORT}`);
+});
 
 // Registrar usuario
 app.post("/api/registrar", async ({ body }: { body: {nombre: string; correo: string; clave: string; descripcion: string} }) => {
@@ -57,7 +62,7 @@ app.post("/api/bloquear", async ({ body }: { body: {correo:string; clave: string
 });
 
 // Obtener información pública de cliente
-app.get("/api/informacion/:correo:", async ({ params }: { params: {correo: string} }) => {
+app.get("/api/informacion/:correo", async ({ params }: { params: {correo: string} }) => {
   try {
     const usuario = await prisma.user.findUnique({
       where: {correo: params.correo},
