@@ -1,56 +1,59 @@
-import { Elysia } from 'elysia';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { Elysia } from "elysia";
+import { PrismaClient } from "@prisma/client";
 
 const app = new Elysia();
+const prisma = new PrismaClient();
 
-// Definir rutas y controladores para consultas básicas
-
-app.get('/users', async (handler) => {
-  const users = await prisma.user.findMany({
-    select: {
-      id: true,
-      nombre: true,
-      correo: true,
-      descripcion: true,
-    },
-  });
-  return handler.json(users);
-});
-
-app.get('/users/:id', async (handler: Params) => {
-  const userId = parseInt(handler.params.id);
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      id: true,
-      nombre: true,
-      correo: true,
-      descripcion: true,
-    },
-  });
-  if (!user) {
-    return handler.notFound('Usuario no encontrado');
+// Registrar usuario
+app.post("/api/registrar", async ({ body }: { body: any}) => {
+  const {nombre, correo, clave, descripcion} = body;
+  try {
+    const nuevoUsuario = await prisma.user.create({
+      data: {
+        nombre,
+        correo,
+        clave,
+        descripcion,
+      },
+    });
+    return {estado: 200, mensaje: "Se realizp la peticion correctamente"};
+  } catch (error) {
+    console.error(error)
+    return {estado: 500, mesnaje: "Hubo un error al realizar la petición"};
   }
-  return handler.json(user);
 });
 
-// Puedes agregar rutas similares para otras consultas básicas
-
-app.get('/emails', async (handler) => {
-  const emails = await prisma.email.findMany({
-    select: {
-      id: true,
-      asunto: true,
-      contenido: true,
-      fechaEnvio: true,
-    },
-  });
-  return handler.json(emails);
+// Bloquear usuario
+app.post("/api/bloquear", async ({ body }: { body:any }) => {
+  const {correo, clave, correo_bloquear} = body;
+  try {
+    const usuario = await prisma.user.findUnique({
+      where: {correo},
+    });
+    if (usuario && usuario.clave === clave) {
+      const usuarioBloquear = await prisma.user.findUnique({
+        where: {correo: correo_bloquear}
+      });
+      if (usuarioBloquear) {
+        await prisma.blockedAddress.create({
+          data: {
+            usuarioId: usuario.id,
+            usuarioBloqueadoId: usuarioBloquear.id,
+          },
+        });
+        return {estado:200, mensaje: "Usuario bloqueado exitosamente"};
+      } else {
+        return {estado: 400, mensaje: "Usuario a bloquear no encontrado"};
+      }
+    } else {
+      return {estado: 400, mensaje: "Nombre de usuario o clave incorrecta"};
+    }
+  } catch (error) {
+    console.error(error)
+    return {estado: 500, mensaje: "Hubo un error al realizar la petición"};
+  }
 });
 
-// ... (rutas para otras consultas básicas a Email y modelos restantes)
-
-// Iniciar el servidor
-app.listen(3000);
+console.log(
+  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
+);
