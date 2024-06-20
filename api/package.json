@@ -12,7 +12,11 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@prisma/client": "^5.15.1",
+=======
+    "@prisma/client": "5.15.1",
+>>>>>>> 2c8644e (cliente funcional v0.1)
     "elysia": "^1.0.24",
     "prisma": "^5.15.1"
   }
