@@ -5,13 +5,11 @@ const app = new Elysia();
 const prisma = new PrismaClient();
 const PORT = 3000;
 
-app.listen(PORT, () => {
-  console.log(`🦊 Elysia is running at http://localhost:${PORT}`);
-});
+const userRoutes = new Elysia({ prefix: "/api" });
 
 // Registrar usuario
-app.post("/api/registrar", async ({ body }: { body: {nombre: string; correo: string; clave: string; descripcion: string} }) => {
-  const {nombre, correo, clave, descripcion} = body;
+userRoutes.post("/registrar", async ({ body }: { body: { nombre: string; correo: string; clave: string; descripcion: string } }) => {
+  const { nombre, correo, clave, descripcion } = body;
   try {
     const nuevoUsuario = await prisma.user.create({
       data: {
@@ -22,23 +20,24 @@ app.post("/api/registrar", async ({ body }: { body: {nombre: string; correo: str
         fechaRegistro: new Date(),
       },
     });
-    return {estado: 200, mensaje: "Se realizp la peticion correctamente"};
+    return { estado: 200, mensaje: "Se realizó la peticion correctamente" };
   } catch (error) {
     console.error(error);
-    return {estado: 500, mesnaje: "Hubo un error al realizar la petición"};
+    return { estado: 500, mesnaje: "Hubo un error al realizar la petición" };
   }
 });
 
 // Bloquear usuario
-app.post("/api/bloquear", async ({ body }: { body: {correo:string; clave: string; correo_bloquear: string} }) => {
-  const {correo, clave, correo_bloquear} = body;
+userRoutes.post("/bloquear", async ({ body }: { body: { correo: string; clave: string; correo_bloquear: string } }) => {
+  const { correo, clave, correo_bloquear } = body;
   try {
     const usuario = await prisma.user.findUnique({
-      where: {correo},
+      where: { correo },
     });
+
     if (usuario && usuario.clave === clave) {
       const usuarioBloquear = await prisma.user.findUnique({
-        where: {correo: correo_bloquear}
+        where: { correo: correo_bloquear }
       });
       if (usuarioBloquear) {
         await prisma.blockedAddress.create({
@@ -48,104 +47,118 @@ app.post("/api/bloquear", async ({ body }: { body: {correo:string; clave: string
             fechaBloqueo: new Date(),
           },
         });
-        return {estado:200, mensaje: "Usuario bloqueado exitosamente"};
+        return { estado: 200, mensaje: "Usuario bloqueado exitosamente" };
       } else {
-        return {estado: 400, mensaje: "Usuario a bloquear no encontrado"};
+        return { estado: 400, mensaje: "Usuario a bloquear no encontrado" };
       }
     } else {
-      return {estado: 400, mensaje: "Nombre de usuario o clave incorrecta"};
+      return { estado: 400, mensaje: "Nombre de usuario o clave incorrecta" };
     }
   } catch (error) {
     console.error(error);
-    return {estado: 500, mensaje: "Hubo un error al realizar la petición"};
+    return { estado: 500, mensaje: "Hubo un error al realizar la petición" };
   }
 });
 
 // Obtener información pública de cliente
-app.get("/api/informacion/:correo", async ({ params }: { params: {correo: string} }) => {
+userRoutes.get("/informacion/:correo", async ({ params }: { params: { correo: string } }) => {
   try {
     const usuario = await prisma.user.findUnique({
-      where: {correo: params.correo},
+      where: { correo: params.correo },
       select: {
         nombre: true,
         correo: true,
         descripcion: true,
       },
     });
+
     if (usuario) {
-      return {...usuario};
+      return { ...usuario };
     } else {
-      return {estado: 400, mensaje: "Usuario no encontrado"};
+      return { estado: 400, mensaje: "Usuario no encontrado" };
     }
   } catch (error) {
     console.error(error);
-    return {estado: 500, mensaje: "Hubo un error al realizar la petición"};
+    return { estado: 500, mensaje: "Hubo un error al realizar la petición" };
   }
 });
 
 // Marcar como favorito
-app.post("/api/marcarcorreo", async ({ body }: { body: {correo: string; clave: string; id_correo_favorito: number} }) => {
-  const {correo, clave, id_correo_favorito} = body;
+userRoutes.post("/marcarcorreo", async ({ body }: { body: { correo: string; clave: string; id_correo_favorito: number } }) => {
+  const { correo, clave, id_correo_favorito } = body;
   try {
     const usuario = await prisma.user.findUnique({
-      where: {correo},
+      where: { correo },
     });
+
     if (usuario && usuario.clave === clave) {
-      const usuarioFavorito = await prisma.user.findUnique({
-        where: {id: id_correo_favorito}
+      const emailFavorito = await prisma.email.findUnique({
+        where: { id: id_correo_favorito }
       });
-      if (usuarioFavorito) {
+
+      if (emailFavorito) {
         await prisma.favoriteAddress.create({
           data: {
             usuarioId: usuario.id,
-            correoFavoritoId: usuarioFavorito.id,
-            fechaMarcado: new Date()
+            correoFavoritoId: id_correo_favorito,
+            fechaMarcado: new Date(),
           },
         });
-        return {estado: 200, mensaje: "Usuario añadido a favoritos exitosamente"};
+        
+        return { estado: 200, mensaje: "Correo marcado como favorito exitosamente" };
       } else {
-        return {estado: 400, mensaje: "Usuario a añadir a favoritos no encontrado"};
+        return { estado: 400, mensaje: "Correo a marcar como favorito no encontrado" };
       }
     } else {
-      return {estado: 400, mensaje: "Nombre de usuario o contraseña incorrecta"};
+      return { estado: 400, mensaje: "Nombre de usuario o contraseña incorrecta" };
     }
   } catch (error) {
     console.error(error);
-    return {estado: 400, mensaje: "Hubo un error al realizar la petición"};
+    return { estado: 500, mensaje: "Hubo un error al realizar la petición" };
   }
 });
 
 // Desmarcar como favorito
-app.delete("/api/desmarcarcorreo", async ({ body }: { body: {correo: string; clave: string; id_correo_favorito: number} }) => {
-  const {correo, clave, id_correo_favorito} = body;
+userRoutes.delete("/desmarcarcorreo", async ({ body }: { body: { correo: string; clave: string; id_correo_favorito: number } }) => {
+  const { correo, clave, id_correo_favorito } = body;
   try {
     const usuario = await prisma.user.findUnique({
-      where: {correo},
+      where: { correo },
     });
+
     if (usuario && usuario.clave === clave) {
-      const usuarioFavorito = await prisma.user.findUnique({
-        where: {id: id_correo_favorito}
+      const favoritoExistente = await prisma.favoriteAddress.findFirst({
+        where: {
+          usuarioId: usuario.id,
+          correoFavoritoId: id_correo_favorito,
+        },
       });
-      if (usuarioFavorito) {
-        await prisma.favoriteAddress.deleteMany({
+
+      if (favoritoExistente) {
+        await prisma.favoriteAddress.delete({
           where: {
-            usuarioId: usuario.id,
-            correoFavoritoId: usuarioFavorito.id,
+            id: favoritoExistente.id,
           },
         });
-        return {estado: 200, mensaje: "Usuario eliminado de favoritos exitosamente"};
+
+        return { estado: 200, mensaje: "Correo eliminado de favoritos exitosamente" };
       } else {
-        return {estado: 400, mensaje: "Usuario a eliminar no encontrado"};
+        return { estado: 400, mensaje: "Correo a desmarcar como favorito no encontrado" };
       }
     } else {
-      return {estado: 400, mensaje: "Nombre de usuario o contraseña incorrecta"};
+      return { estado: 400, mensaje: "Nombre de usuario o contraseña incorrecta" };
     }
   } catch (error) {
     console.error(error);
-    return {estado: 400, mensaje: "Hubo un error al realizar la petición"};
+    return { estado: 500, mensaje: "Hubo un error al realizar la petición" };
   }
 });
 
-console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
-);
+// Registrar las rutas de usuario en la app principal
+app.use(userRoutes);
+
+// Iniciar el servidor
+app.listen(PORT, () => {
+  console.log(`🦊 Elysia is running at http://localhost:${PORT}`);
+});
+
