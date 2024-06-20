@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = env("DATABASE_URL")
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres@127.0.0.1:5432/CommuniKenDB?schema=public"
+}
+
+// Definición de modelos
+
+model User {
+  id               Int               @id @default(autoincrement())
+  nombre           String
+  correo           String            @unique
+  clave            String
+  descripcion      String?
+  fechaRegistro    DateTime          @default(now())
+  // Relaciones
+  correosEnviados  Email[]           @relation("Remitente")
+  correosRecibidos Email[]           @relation("Destinatario")
+  bloqueos         BlockedAddress[]  @relation("Bloqueador")
+  bloqueadoPor     BlockedAddress[]  @relation("Bloqueado")
+  favoritos        FavoriteAddress[]
+}
+
+model Email {
+  id              Int               @id @default(autoincrement())
+  asunto          String
+  contenido       String
+  remitente       User              @relation("Remitente", fields: [remitenteId], references: [id])
+  remitenteId     Int
+  destinatario    User              @relation("Destinatario", fields: [destinatarioId], references: [id])
+  destinatarioId  Int
+  fechaEnvio      DateTime          @default(now())
+  favorito        Boolean           @default(false)
+  FavoriteAddress FavoriteAddress[]
+}
+
+model BlockedAddress {
+  id                 Int      @id @default(autoincrement())
+  usuario            User     @relation("Bloqueador", fields: [usuarioId], references: [id])
+  usuarioId          Int
+  usuarioBloqueado   User     @relation("Bloqueado", fields: [usuarioBloqueadoId], references: [id])
+  usuarioBloqueadoId Int
+  fechaBloqueo       DateTime @default(now())
+}
+
+model FavoriteAddress {
+  id               Int      @id @default(autoincrement())
+  usuario          User     @relation(fields: [usuarioId], references: [id])
+  usuarioId        Int
+  correoFavorito   Email    @relation(fields: [correoFavoritoId], references: [id])
+  correoFavoritoId Int
+  fechaMarcado     DateTime @default(now())
+}
