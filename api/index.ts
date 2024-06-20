@@ -324,13 +324,31 @@ app.listen(PORT, () => {
 import { Elysia } from 'elysia'
 import { PrismaClient } from '@prisma/client'
 
-//Create a new prisma client instance
+//Instancia de prisma
 const prisma = new PrismaClient({
     log: ['info', 'warn', 'error']
 })
 
 //Create a new elysia instance and pass DB as context
 const app = new Elysia().decorate('db', prisma)
+
+// Iniciar sesión
+app.post("/api/login", async ({ body }: { body: any }) => {
+  const { correo, clave } = body;
+  try {
+      const usuario = await prisma.user.findUnique({
+          where: { correo },
+      });
+      if (usuario && usuario.clave === clave) {
+          return { estado: 200, mensaje: "Inicio de sesión exitoso" };
+      } else {
+          return { estado: 401, mensaje: "Credenciales inválidas" };
+      }
+  } catch (error) {
+      console.error(error);
+      return { estado: 500, mensaje: "Hubo un error al realizar la petición" };
+  }
+});
 
 // Registrar usuario
 app.post("/api/registrar", async ({ body }: { body: any}) => {
@@ -384,7 +402,7 @@ app.post("/api/bloquear", async ({ body }: { body:any }) => {
   });
   
 
-//App listening on specified port
+//App en puerto configurado
 app.listen(process.env.API_PORT || 3000, () => {
     console.log(`Server is running in port ${app.server?.port}`)
 })
