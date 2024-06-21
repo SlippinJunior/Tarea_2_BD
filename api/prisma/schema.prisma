@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 generator client {
   provider = "prisma-client-js"
 =======
@@ -11,10 +12,15 @@ generator client {
 generator client {
   provider = env("DATABASE_URL")
 >>>>>>> 2c8644e (cliente funcional v0.1)
+=======
+generator client {
+  provider = "prisma-client-js"
+>>>>>>> e8d615e (CommuniKen v1.0)
 }
 
 datasource db {
   provider = "postgresql"
+<<<<<<< HEAD
 <<<<<<< HEAD
   url      = env("DATABASE_URL")
 }
@@ -23,6 +29,10 @@ datasource db {
 }
 
 >>>>>>> 2c8644e (cliente funcional v0.1)
+=======
+  url      = env("DATABASE_URL")
+}
+>>>>>>> e8d615e (CommuniKen v1.0)
 // Definición de modelos
 
 model User {
@@ -38,10 +48,14 @@ model User {
   bloqueos         BlockedAddress[]  @relation("Bloqueador")
   bloqueadoPor     BlockedAddress[]  @relation("Bloqueado")
 <<<<<<< HEAD
+<<<<<<< HEAD
   favoritos        FavoriteEmail[]
 =======
   favoritos        FavoriteAddress[]
 >>>>>>> 2c8644e (cliente funcional v0.1)
+=======
+  favoritos        FavoriteEmail[]
+>>>>>>> e8d615e (CommuniKen v1.0)
 }
 
 model Email {
@@ -55,10 +69,14 @@ model Email {
   fechaEnvio      DateTime          @default(now())
   favorito        Boolean           @default(false)
 <<<<<<< HEAD
+<<<<<<< HEAD
   favoriteEmails FavoriteEmail[]
 =======
   FavoriteAddress FavoriteAddress[]
 >>>>>>> 2c8644e (cliente funcional v0.1)
+=======
+  favoriteEmails FavoriteEmail[]
+>>>>>>> e8d615e (CommuniKen v1.0)
 }
 
 model BlockedAddress {
@@ -71,10 +89,14 @@ model BlockedAddress {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 model FavoriteEmail {
 =======
 model FavoriteAddress {
 >>>>>>> 2c8644e (cliente funcional v0.1)
+=======
+model FavoriteEmail {
+>>>>>>> e8d615e (CommuniKen v1.0)
   id               Int      @id @default(autoincrement())
   usuario          User     @relation(fields: [usuarioId], references: [id])
   usuarioId        Int
@@ -82,8 +104,13 @@ model FavoriteAddress {
   correoFavoritoId Int
   fechaMarcado     DateTime @default(now())
 <<<<<<< HEAD
+<<<<<<< HEAD
 	@@map("FavoriteEmail")
 }
 =======
 }
 >>>>>>> 2c8644e (cliente funcional v0.1)
+=======
+	@@map("FavoriteEmail")
+}
+>>>>>>> e8d615e (CommuniKen v1.0)

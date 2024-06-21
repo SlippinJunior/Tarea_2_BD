@@ -178,6 +178,7 @@ def visor_correos(correo, clave, opcion):
             marcar_correo(correo, clave, id_correo, 1)
     print()
 
+<<<<<<< HEAD
 def menu_principal(correo, clave):
     while True:
         print("\n--★ Menú Principal ★--")
@@ -267,24 +268,29 @@ def iniciar_sesion():
     except requests.exceptions.RequestException as e:
         print(f"Error al conectar con la API: {e}")
 
+=======
+>>>>>>> e8d615e (CommuniKen v1.0)
 def menu_principal(correo, clave):
     while True:
         print("\n--- Menú Principal ---")
         print("1. Enviar un correo")
         print("2. Ver información de una dirección de correo electrónico")
-        print("3. Ver correos marcados como favoritos")
-        print("4. Marcar correo como favorito")
-        print("5. Salir")
+        print("3. Bloquear usuario")
+        print("4. Ver correos marcados como favoritos")
+        print("5. Marcar correo como favorito")
+        print("6. Cerrar sesion")
         opcion = input("Seleccione una opción: ")
         if opcion == "1":
-            print("Funcionalidad de enviar un correo (por implementar)")
+            enviar_correo(correo, clave)
         elif opcion == "2":
-            print("Funcionalidad de ver información (por implementar)")
+            obtener_informacion_correo()
         elif opcion == "3":
-            print("Funcionalidad de ver correos favoritos (por implementar)")
+            bloquear_usuario(correo, clave)
         elif opcion == "4":
-            print("Funcionalidad de marcar correo como favorito (por implementar)")
+            visor_correos(correo, clave, 1)
         elif opcion == "5":
+            visor_correos(correo, clave, 0)
+        elif opcion == "6":
             print("Saliendo...")
             break
         else:
