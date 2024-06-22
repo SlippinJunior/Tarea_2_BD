@@ -272,7 +272,7 @@ def iniciar_sesion():
 >>>>>>> e8d615e (CommuniKen v1.0)
 def menu_principal(correo, clave):
     while True:
-        print("\n--- Menú Principal ---")
+        print("\n--★ Menú Principal ★--")
         print("1. Enviar un correo")
         print("2. Ver información de una dirección de correo electrónico")
         print("3. Bloquear usuario")
@@ -298,7 +298,7 @@ def menu_principal(correo, clave):
 
 def menu_inicial():
     while True:
-        print("\n--- Menú Inicial ---")
+        print("\n--★ Bienvenido ★--")
         print("1. Registrarse")
         print("2. Iniciar sesión")
         print("3. Salir")
@@ -312,6 +312,17 @@ def menu_inicial():
             break
         else:
             print("Opción no válida. Intente de nuevo.")
+
+communiken = """
+   _____                                             _  _   __             
+  /  __ \                                           (_)| | / /             
+  | /  \/  ___   _ __ ___   _ __ ___   _   _  _ __   _ | |/ /   ___  _ __  
+  | |     / _ \ | '_ ` _ \ | '_ ` _ \ | | | || '_ \ | ||    \  / _ \| '_ \ 
+  | \__/\| (_) || | | | | || | | | | || |_| || | | || || |\  \|  __/| | | |
+   \____/ \___/ |_| |_| |_||_| |_| |_| \__,_||_| |_||_|\_| \_/ \___||_| |_|
+                                                                           
+       
+"""
 
 if __name__ == "__main__":
 <<<<<<< HEAD
