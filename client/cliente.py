@@ -1,9 +1,11 @@
 import requests
 from colorama import Fore, Style
 
+# URL base para las solicitudes a la API
 BASE_URL = 'http://localhost:3000/api'
 
 def registrar_usuario():
+    # Solicita información del usuario para registrarse
     nombre = input("Ingrese su nombre: ")
     correo = input("Ingrese su correo electrónico: ")
     clave = input("Ingrese su clave: ")
@@ -16,14 +18,17 @@ def registrar_usuario():
     }
     url = f"{BASE_URL}/registrar"
     try:
+        # Envía una solicitud POST para registrar al usuario
         response = requests.post(url, json=data)
         response.raise_for_status()
         resultado = response.json()
         print(resultado["mensaje"])
     except requests.exceptions.RequestException as e:
+        # Manejo de errores en caso de falla en la conexión
         print(f"Error al conectar con la API: {e}")
 
 def iniciar_sesion():
+    # Solicita las credenciales del usuario para iniciar sesión
     correo = input("Ingrese su correo electrónico: ")
     clave = input("Ingrese su clave: ")
     data = {
@@ -32,6 +37,7 @@ def iniciar_sesion():
     }
     url = f"{BASE_URL}/login"
     try:
+        # Envía una solicitud POST para iniciar sesión
         response = requests.post(url, json=data)
         response.raise_for_status()
         resultado = response.json()
@@ -44,6 +50,7 @@ def iniciar_sesion():
         print(f"Error al conectar con la API: {e}")
 
 def enviar_correo(correo, clave):
+    # Solicita información para enviar un correo
     destinatario_correo = input("Ingrese el correo del destinatario: ")
     asunto = input("Ingrese el asunto del correo: ")
     contenido = input("Ingrese el contenido del correo: ")
@@ -56,6 +63,7 @@ def enviar_correo(correo, clave):
     }
     url = f"{BASE_URL}/enviarcorreo"
     try:
+        # Envía una solicitud POST para enviar el correo
         response = requests.post(url, json=data)
         response.raise_for_status()
         resultado = response.json()
@@ -64,9 +72,11 @@ def enviar_correo(correo, clave):
         print(f"Error al conectar con la API: {e}")
 
 def obtener_informacion_correo():
+    # Solicita el correo del cliente para obtener información
     correo_obtener = input("Ingrese el correo del cliente para obtener información: ")
     url = f"{BASE_URL}/informacion/{correo_obtener}"
     try:
+        # Envía una solicitud GET para obtener información del usuario
         response = requests.get(url)
         response.raise_for_status()
         resultado = response.json()
@@ -78,6 +88,7 @@ def obtener_informacion_correo():
         print(f"Error al conectar con la API: {e}")
 
 def bloquear_usuario(correo, clave):
+    # Solicita el correo del usuario a bloquear
     correo_bloquear = input("Ingrese el correo del usuario a bloquear: ")
     data = {
         "correo": correo,
@@ -86,6 +97,7 @@ def bloquear_usuario(correo, clave):
     }
     url = f"{BASE_URL}/bloquear"
     try:
+        # Envía una solicitud POST para bloquear al usuario
         response = requests.post(url, json=data)
         response.raise_for_status()
         resultado = response.json()
@@ -95,6 +107,7 @@ def bloquear_usuario(correo, clave):
 
 def obtener_correos(correo, opcion):
     try:
+        # Obtiene correos favoritos o recibidos según la opción
         if opcion == 1:
             response = requests.get(f"{BASE_URL}/correosfavoritos/{correo}")
         else:
@@ -107,6 +120,7 @@ def obtener_correos(correo, opcion):
         return []
 
 def marcar_correo(correo, clave, id_correo, opcion):
+    # Marca o desmarca un correo como favorito según la opción
     if opcion == 1:
         data = {
             "correo": correo,
@@ -131,6 +145,7 @@ def marcar_correo(correo, clave, id_correo, opcion):
         print(f"Error al conectar con la API: {e}")
 
 def mostrar_correos(correos, opcion):
+    # Muestra correos favoritos o recibidos según la opción
     if opcion == 1:
         print("Correos favoritos:")
     else:
@@ -144,8 +159,8 @@ def mostrar_correos(correos, opcion):
         print(f"ID: {correo['id']}, De: {remitente_correo}, Asunto: {correo['asunto']}")
     print()
 
-
 def visor_correos(correo, clave, opcion):
+    # Visor de correos que permite marcar o desmarcar correos como favoritos
     if opcion == 1:
         correos = obtener_correos(correo, 1)
         mostrar_correos(correos, 1)
@@ -161,6 +176,7 @@ def visor_correos(correo, clave, opcion):
     print()
 
 def menu_principal(correo, clave):
+    # Menú principal de la aplicación después de iniciar sesión
     while True:
         print("\n--★ Menú Principal ★--")
         print("1. Enviar un correo")
@@ -187,6 +203,7 @@ def menu_principal(correo, clave):
             print("Opción no válida. Intente de nuevo.")
 
 def menu_inicial():
+    # Menú inicial de la aplicación antes de iniciar sesión
     while True:
         print("\n--★ Bienvenido ★--")
         print("1. Registrarse")
@@ -202,6 +219,7 @@ def menu_inicial():
             break
         else:
             print("Opción no válida. Intente de nuevo.")
+
 
 communiken = """
    _____                                             _  _   __             

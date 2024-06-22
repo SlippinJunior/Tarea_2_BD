@@ -6,6 +6,7 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 // Definición de modelos
 
 model User {
@@ -15,6 +16,7 @@ model User {
   clave            String
   descripcion      String?
   fechaRegistro    DateTime          @default(now())
+
   // Relaciones
   correosEnviados  Email[]           @relation("Remitente")
   correosRecibidos Email[]           @relation("Destinatario")
@@ -33,7 +35,9 @@ model Email {
   destinatarioId  Int
   fechaEnvio      DateTime          @default(now())
   favorito        Boolean           @default(false)
-  favoriteEmails FavoriteEmail[]
+
+  // Relaciones
+  favoriteEmails  FavoriteEmail[]
 }
 
 model BlockedAddress {
@@ -52,5 +56,6 @@ model FavoriteEmail {
   correoFavorito   Email    @relation(fields: [correoFavoritoId], references: [id])
   correoFavoritoId Int
   fechaMarcado     DateTime @default(now())
-	@@map("FavoriteEmail")
+
+  @@map("FavoriteEmail")
 }

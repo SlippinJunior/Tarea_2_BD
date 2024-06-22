@@ -1,41 +1,40 @@
 import { Elysia } from "elysia";
 import { PrismaClient } from "@prisma/client";
 
-const app = new Elysia();
-const prisma = new PrismaClient();
-const PORT = 3000;
+const app = new Elysia(); // Crear una instancia de la aplicación Elysia
+const prisma = new PrismaClient(); // Crear una instancia de PrismaClient para interactuar con la base de datos
+const PORT = 3000; // Definir el puerto en el que se ejecutará la aplicación
 
+const userRoutes = new Elysia({ prefix: "/api" }); // Crear un enrutador de Elysia con prefijo '/api'
 
-const userRoutes = new Elysia({ prefix: "/api" });
-
-//Funcion para obtener la hora actual
+// Función para obtener la hora actual en formato 'hora:minuto'
 function obtenerHoraActual(): string {
   const fechaActual: Date = new Date();
   const horaActual: string = fechaActual.toLocaleTimeString('es-CL', { hour: 'numeric', minute: 'numeric' });
-  return `[${horaActual}]`;
+  return `${horaActual}`;
 }
 
-// Iniciar sesión, implementado
+// Ruta para iniciar sesión
 userRoutes.post("/login", async ({ body }: { body: any }) => {
   const { correo, clave } = body;
   try {
-      const horaActual: string = obtenerHoraActual();
-      const usuario = await prisma.user.findUnique({
-          where: { correo },
-      });
-      if (usuario && usuario.clave === clave) {
-          console.log(`[${horaActual}] Inicio de sesión exitoso: ${usuario.correo}`); // Imprimir mensaje con hora y usuario
-          return { estado: 200, mensaje: "Inicio de sesión exitoso"};
-      } else {
-          return { estado: 401, mensaje: "Credenciales inválidas" };
-      }
+    const horaActual: string = obtenerHoraActual();
+    const usuario = await prisma.user.findUnique({
+      where: { correo },
+    });
+    if (usuario && usuario.clave === clave) {
+      console.log(`[${horaActual}] Inicio de sesión exitoso: ${usuario.correo}`);
+      return { estado: 200, mensaje: "Inicio de sesión exitoso" };
+    } else {
+      return { estado: 401, mensaje: "Credenciales inválidas" };
+    }
   } catch (error) {
-      console.error(error);
-      return { estado: 500, mensaje: "Hubo un error al realizar la petición" };
+    console.error(error);
+    return { estado: 500, mensaje: "Hubo un error al realizar la petición" };
   }
 });
 
-// Registrar usuario, implementado
+// Ruta para registrar un usuario
 userRoutes.post("/registrar", async ({ body }: { body: { nombre: string; correo: string; clave: string; descripcion: string } }) => {
   const { nombre, correo, clave, descripcion } = body;
   try {
@@ -49,21 +48,21 @@ userRoutes.post("/registrar", async ({ body }: { body: { nombre: string; correo:
         fechaRegistro: new Date(),
       },
     });
-    console.log(`[${horaActual}] Usuario registrado: ${nuevoUsuario.correo}`); // Imprimir mensaje de exito en el registro
-    return { estado: 200, mensaje: "Se realizó la peticion correctamente" };
+    console.log(`[${horaActual}] Usuario registrado: ${nuevoUsuario.correo}`);
+    return { estado: 200, mensaje: "Se realizó la petición correctamente" };
   } catch (error) {
     console.error(error);
     return { estado: 500, mesnaje: "Hubo un error al realizar la petición" };
   }
 });
 
-// Enviar correo, implementado
+// Ruta para enviar un correo
 userRoutes.post("/enviarcorreo", async ({ body }: { body: { remitenteCorreo: string; destinatarioCorreo: string; asunto: string; contenido: string } }) => {
   const { remitenteCorreo, destinatarioCorreo, asunto, contenido } = body;
   try {
     const horaActual: string = obtenerHoraActual();
     const remitente = await prisma.user.findUnique({
-      where: { correo: remitenteCorreo},
+      where: { correo: remitenteCorreo },
     });
 
     if (remitente) {
@@ -96,7 +95,7 @@ userRoutes.post("/enviarcorreo", async ({ body }: { body: { remitenteCorreo: str
   }
 });
 
-// Bloquear usuario, implementado
+// Ruta para bloquear un usuario
 userRoutes.post("/bloquear", async ({ body }: { body: { correo: string; clave: string; correo_bloquear: string } }) => {
   const { correo, clave, correo_bloquear } = body;
   try {
@@ -125,20 +124,16 @@ userRoutes.post("/bloquear", async ({ body }: { body: { correo: string; clave: s
       },
     });
 
-    console.log(`[${horaActual}] Usuario: ${correo} bloqueo exitosamente a: ${correo_bloquear}`);
+    console.log(`[${horaActual}] Usuario: ${correo} bloqueó exitosamente a: ${correo_bloquear}`);
     return { estado: 200, mensaje: "Usuario bloqueado exitosamente" };
 
   } catch (error) {
     console.error(error);
-    let errorMessage = "Hubo un error al realizar la petición";
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-    return { estado: 500, mensaje: errorMessage };
+    return { estado: 500, mensaje: "Hubo un error al realizar la petición" };
   }
 });
 
-// Obtener información pública de cliente, implementado
+// Ruta para obtener información pública de un usuario
 userRoutes.get("/informacion/:correo", async ({ params }: { params: { correo: string } }) => {
   try {
     const horaActual: string = obtenerHoraActual();
@@ -152,7 +147,7 @@ userRoutes.get("/informacion/:correo", async ({ params }: { params: { correo: st
     });
 
     if (usuario) {
-      console.log(`[${horaActual}] Se obtuvo informacion del usuario: ${usuario.correo}`);
+      console.log(`[${horaActual}] Se obtuvo información del usuario: ${usuario.correo}`);
       return { ...usuario };
     } else {
       return { estado: 400, mensaje: "Usuario no encontrado" };
@@ -163,7 +158,7 @@ userRoutes.get("/informacion/:correo", async ({ params }: { params: { correo: st
   }
 });
 
-// Marcar como favorito, implementado
+// Ruta para marcar un correo como favorito
 userRoutes.post("/marcarcorreo", async ({ body }: { body: { correo: string; clave: string; id_correo_favorito: number } }) => {
   const { correo, clave, id_correo_favorito } = body;
   try {
@@ -194,7 +189,7 @@ userRoutes.post("/marcarcorreo", async ({ body }: { body: { correo: string; clav
           },
         });
 
-        console.log(`[${horaActual}] Usuario: ${correo} marco el correo: ${id_correo_favorito} como favorito`);
+        console.log(`[${horaActual}] Usuario: ${correo} marcó el correo: ${id_correo_favorito} como favorito`);
         return { estado: 200, mensaje: "Correo marcado como favorito exitosamente" };
       } else {
         return { estado: 400, mensaje: "Correo a marcar como favorito no encontrado" };
@@ -208,8 +203,7 @@ userRoutes.post("/marcarcorreo", async ({ body }: { body: { correo: string; clav
   }
 });
 
-
-// Desmarcar como favorito, implementado
+// Ruta para desmarcar un correo como favorito
 userRoutes.delete("/desmarcarcorreo", async ({ body }: { body: { correo: string; clave: string; id_correo_favorito: number } }) => {
   const { correo, clave, id_correo_favorito } = body;
   try {
@@ -237,13 +231,13 @@ userRoutes.delete("/desmarcarcorreo", async ({ body }: { body: { correo: string;
       return { estado: 400, mensaje: "Correo a desmarcar como favorito no encontrado" };
     }
 
+    console.log(`[${horaActual}] Usuario: ${correo} desmarcó el correo: ${id_correo_favorito} de favoritos`);
     await prisma.favoriteEmail.delete({
       where: {
         id: favoritoExistente.id,
       },
     });
 
-    console.log(`[${horaActual}] Usuario: ${correo} desmarco el correo: ${id_correo_favorito} de favoritos`);
     return { estado: 200, mensaje: "Correo eliminado de favoritos exitosamente" };
   } catch (error) {
     console.error("Error al desmarcar correo como favorito:", error);
@@ -251,8 +245,7 @@ userRoutes.delete("/desmarcarcorreo", async ({ body }: { body: { correo: string;
   }
 });
 
-
-// Obtener correos recibidos, implementado
+// Ruta para obtener los correos recibidos
 userRoutes.get("/obtenercorreos/:correo", async ({ params }: { params: { correo: string } }) => {
   const { correo } = params;
   try {
@@ -279,7 +272,7 @@ userRoutes.get("/obtenercorreos/:correo", async ({ params }: { params: { correo:
   }
 });
 
-// Obtener correos marcados como favoritos, implementado
+// Ruta para obtener los correos marcados como favoritos
 userRoutes.get("/correosfavoritos/:correo", async ({ params }: { params: { correo: string } }) => {
   try {
     const horaActual: string = obtenerHoraActual();
@@ -303,14 +296,13 @@ userRoutes.get("/correosfavoritos/:correo", async ({ params }: { params: { corre
       contenido: fav.correoFavorito.contenido,
     }));
 
-    console.log(`[${horaActual}] Se obtuvieron los correos favoritos del usuario ${usuario}`);
+    console.log(`[${horaActual}] Se obtuvieron los correos favoritos del usuario ${usuario.correo}`);
     return correosFavoritosInfo;
   } catch (error) {
     console.error(error);
     return { estado: 500, mensaje: "Hubo un error al realizar la petición" };
   }
 });
-
 
 // Registrar las rutas de usuario en la app principal
 app.use(userRoutes);
