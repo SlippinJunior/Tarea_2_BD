@@ -1,4 +1,5 @@
 import requests
+from colorama import Fore, Style
 
 BASE_URL = 'http://localhost:3000/api'
 
@@ -161,7 +162,7 @@ def visor_correos(correo, clave, opcion):
 
 def menu_principal(correo, clave):
     while True:
-        print("\n--- Menú Principal ---")
+        print("\n--★ Menú Principal ★--")
         print("1. Enviar un correo")
         print("2. Ver información de una dirección de correo electrónico")
         print("3. Bloquear usuario")
@@ -187,7 +188,7 @@ def menu_principal(correo, clave):
 
 def menu_inicial():
     while True:
-        print("\n--- Menú Inicial ---")
+        print("\n--★ Bienvenido ★--")
         print("1. Registrarse")
         print("2. Iniciar sesión")
         print("3. Salir")
@@ -202,5 +203,17 @@ def menu_inicial():
         else:
             print("Opción no válida. Intente de nuevo.")
 
+communiken = """
+   _____                                             _  _   __             
+  /  __ \                                           (_)| | / /             
+  | /  \/  ___   _ __ ___   _ __ ___   _   _  _ __   _ | |/ /   ___  _ __  
+  | |     / _ \ | '_ ` _ \ | '_ ` _ \ | | | || '_ \ | ||    \  / _ \| '_ \ 
+  | \__/\| (_) || | | | | || | | | | || |_| || | | || || |\  \|  __/| | | |
+   \____/ \___/ |_| |_| |_||_| |_| |_| \__,_||_| |_||_|\_| \_/ \___||_| |_|
+                                                                           
+       
+"""
+
 if __name__ == "__main__":
+    print(Fore.MAGENTA + communiken + Fore.RESET)
     menu_inicial()

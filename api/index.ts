@@ -5,16 +5,26 @@ const app = new Elysia();
 const prisma = new PrismaClient();
 const PORT = 3000;
 
+
 const userRoutes = new Elysia({ prefix: "/api" });
+
+//Funcion para obtener la hora actual
+function obtenerHoraActual(): string {
+  const fechaActual: Date = new Date();
+  const horaActual: string = fechaActual.toLocaleTimeString('es-CL', { hour: 'numeric', minute: 'numeric' });
+  return `[${horaActual}]`;
+}
 
 // Iniciar sesión, implementado
 userRoutes.post("/login", async ({ body }: { body: any }) => {
   const { correo, clave } = body;
   try {
+      const horaActual: string = obtenerHoraActual();
       const usuario = await prisma.user.findUnique({
           where: { correo },
       });
       if (usuario && usuario.clave === clave) {
+          console.log(`[${horaActual}] Inicio de sesión exitoso: ${usuario.correo}`); // Imprimir mensaje con hora y usuario
           return { estado: 200, mensaje: "Inicio de sesión exitoso"};
       } else {
           return { estado: 401, mensaje: "Credenciales inválidas" };
@@ -29,6 +39,7 @@ userRoutes.post("/login", async ({ body }: { body: any }) => {
 userRoutes.post("/registrar", async ({ body }: { body: { nombre: string; correo: string; clave: string; descripcion: string } }) => {
   const { nombre, correo, clave, descripcion } = body;
   try {
+    const horaActual: string = obtenerHoraActual();
     const nuevoUsuario = await prisma.user.create({
       data: {
         nombre,
@@ -38,7 +49,7 @@ userRoutes.post("/registrar", async ({ body }: { body: { nombre: string; correo:
         fechaRegistro: new Date(),
       },
     });
-    console.log("Usuario registrado");
+    console.log(`[${horaActual}] Usuario registrado: ${nuevoUsuario.correo}`); // Imprimir mensaje de exito en el registro
     return { estado: 200, mensaje: "Se realizó la peticion correctamente" };
   } catch (error) {
     console.error(error);
@@ -50,6 +61,7 @@ userRoutes.post("/registrar", async ({ body }: { body: { nombre: string; correo:
 userRoutes.post("/enviarcorreo", async ({ body }: { body: { remitenteCorreo: string; destinatarioCorreo: string; asunto: string; contenido: string } }) => {
   const { remitenteCorreo, destinatarioCorreo, asunto, contenido } = body;
   try {
+    const horaActual: string = obtenerHoraActual();
     const remitente = await prisma.user.findUnique({
       where: { correo: remitenteCorreo},
     });
@@ -70,6 +82,7 @@ userRoutes.post("/enviarcorreo", async ({ body }: { body: { remitenteCorreo: str
           },
         });
 
+        console.log(`[${horaActual}] Correo de: ${remitenteCorreo} enviado a: ${destinatarioCorreo} exitosamente`);
         return { estado: 200, mensaje: "Correo enviado exitosamente" };
       } else {
         return { estado: 400, mensaje: "Destinatario no encontrado" };
@@ -87,6 +100,7 @@ userRoutes.post("/enviarcorreo", async ({ body }: { body: { remitenteCorreo: str
 userRoutes.post("/bloquear", async ({ body }: { body: { correo: string; clave: string; correo_bloquear: string } }) => {
   const { correo, clave, correo_bloquear } = body;
   try {
+    const horaActual: string = obtenerHoraActual();
     const usuario = await prisma.user.findUnique({
       where: { correo },
     });
@@ -111,6 +125,7 @@ userRoutes.post("/bloquear", async ({ body }: { body: { correo: string; clave: s
       },
     });
 
+    console.log(`[${horaActual}] Usuario: ${correo} bloqueo exitosamente a: ${correo_bloquear}`);
     return { estado: 200, mensaje: "Usuario bloqueado exitosamente" };
 
   } catch (error) {
@@ -126,6 +141,7 @@ userRoutes.post("/bloquear", async ({ body }: { body: { correo: string; clave: s
 // Obtener información pública de cliente, implementado
 userRoutes.get("/informacion/:correo", async ({ params }: { params: { correo: string } }) => {
   try {
+    const horaActual: string = obtenerHoraActual();
     const usuario = await prisma.user.findUnique({
       where: { correo: params.correo },
       select: {
@@ -136,6 +152,7 @@ userRoutes.get("/informacion/:correo", async ({ params }: { params: { correo: st
     });
 
     if (usuario) {
+      console.log(`[${horaActual}] Se obtuvo informacion del usuario: ${usuario.correo}`);
       return { ...usuario };
     } else {
       return { estado: 400, mensaje: "Usuario no encontrado" };
@@ -150,6 +167,7 @@ userRoutes.get("/informacion/:correo", async ({ params }: { params: { correo: st
 userRoutes.post("/marcarcorreo", async ({ body }: { body: { correo: string; clave: string; id_correo_favorito: number } }) => {
   const { correo, clave, id_correo_favorito } = body;
   try {
+    const horaActual: string = obtenerHoraActual();
     const usuario = await prisma.user.findUnique({
       where: { correo },
       include: { favoritos: true },
@@ -176,6 +194,7 @@ userRoutes.post("/marcarcorreo", async ({ body }: { body: { correo: string; clav
           },
         });
 
+        console.log(`[${horaActual}] Usuario: ${correo} marco el correo: ${id_correo_favorito} como favorito`);
         return { estado: 200, mensaje: "Correo marcado como favorito exitosamente" };
       } else {
         return { estado: 400, mensaje: "Correo a marcar como favorito no encontrado" };
@@ -194,6 +213,7 @@ userRoutes.post("/marcarcorreo", async ({ body }: { body: { correo: string; clav
 userRoutes.delete("/desmarcarcorreo", async ({ body }: { body: { correo: string; clave: string; id_correo_favorito: number } }) => {
   const { correo, clave, id_correo_favorito } = body;
   try {
+    const horaActual: string = obtenerHoraActual();
     const usuario = await prisma.user.findUnique({
       where: { correo },
     });
@@ -223,6 +243,7 @@ userRoutes.delete("/desmarcarcorreo", async ({ body }: { body: { correo: string;
       },
     });
 
+    console.log(`[${horaActual}] Usuario: ${correo} desmarco el correo: ${id_correo_favorito} de favoritos`);
     return { estado: 200, mensaje: "Correo eliminado de favoritos exitosamente" };
   } catch (error) {
     console.error("Error al desmarcar correo como favorito:", error);
@@ -235,6 +256,7 @@ userRoutes.delete("/desmarcarcorreo", async ({ body }: { body: { correo: string;
 userRoutes.get("/obtenercorreos/:correo", async ({ params }: { params: { correo: string } }) => {
   const { correo } = params;
   try {
+    const horaActual: string = obtenerHoraActual();
     const usuario = await prisma.user.findUnique({
       where: { correo },
       select: { id: true },
@@ -249,6 +271,7 @@ userRoutes.get("/obtenercorreos/:correo", async ({ params }: { params: { correo:
       select: { id: true, remitente: { select: { correo: true } }, asunto: true, contenido: true },
     });
 
+    console.log(`[${horaActual}] Se obtuvieron los correos de ${correo}`);
     return correos;
   } catch (error) {
     console.error(error);
@@ -259,6 +282,7 @@ userRoutes.get("/obtenercorreos/:correo", async ({ params }: { params: { correo:
 // Obtener correos marcados como favoritos, implementado
 userRoutes.get("/correosfavoritos/:correo", async ({ params }: { params: { correo: string } }) => {
   try {
+    const horaActual: string = obtenerHoraActual();
     const usuario = await prisma.user.findUnique({
       where: { correo: params.correo },
     });
@@ -279,6 +303,7 @@ userRoutes.get("/correosfavoritos/:correo", async ({ params }: { params: { corre
       contenido: fav.correoFavorito.contenido,
     }));
 
+    console.log(`[${horaActual}] Se obtuvieron los correos favoritos del usuario ${usuario}`);
     return correosFavoritosInfo;
   } catch (error) {
     console.error(error);
