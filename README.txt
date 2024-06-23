@@ -18,9 +18,10 @@ en caso que el servidor tenga contrasena agragarla al url despues del DB_USER.
 
 3.- Desde la carpeta api, ejecutar:
 
+bun install
 bun prisma db push
 
-Para crear la base de datos.
+Para instalar dependencias y crear la base de datos.
 
 4.- Ejecutar el API, desde la carpeta api, ejecutar el comando:
 
